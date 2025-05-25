@@ -85,7 +85,7 @@ def upload_with_rmapi(local_path, remote_folder="/"):
             return False
 
 # Upload files directly from file_map via rmapi
-def upload_files_directly(file_map, remote_folder="/"):
+def upload_files_directly(file_map, remote_folder="/Zotero2Remarkable"):
     """
     Upload files directly from their original locations using rmapi.
     
@@ -96,6 +96,19 @@ def upload_files_directly(file_map, remote_folder="/"):
     if not file_map:
         print("❌ No files to upload.")
         return
+    
+    # Create the remote folder if it doesn't exist
+    if remote_folder != "/":
+        print(f"📁 Ensuring folder exists: {remote_folder}")
+        try:
+            subprocess.run(
+                [LOCAL_RMAPI_PATH, "mkdir", remote_folder],
+                capture_output=True,
+                text=True
+            )
+            print(f"✅ Folder ready: {remote_folder}")
+        except Exception as e:
+            print(f"⚠️  Note: Could not create folder {remote_folder} (may already exist)")
     
     print(f"📁 Found {len(file_map)} entries to process:")
     
@@ -231,7 +244,7 @@ def main():
         sys.exit(1)
     
     print("\n📤 Uploading files directly to reMarkable...")
-    upload_files_directly(file_map, remote_folder="/")
+    upload_files_directly(file_map, remote_folder="/Zotero2Remarkable")
 
 if __name__ == "__main__":
     main()

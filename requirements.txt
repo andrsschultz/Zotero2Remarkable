@@ -1,3 +1,1 @@
 bibtexparser 
-reportlab
-paramiko
