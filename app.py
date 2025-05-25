@@ -1,7 +1,6 @@
 import os
 import bibtexparser
 from bibtexparser.bparser import BibTexParser
-import shutil
 import subprocess
 import sys
 
@@ -50,31 +49,6 @@ def build_file_map(bib_entries):
             file_map[bib_id] = (file_path, meta)
     return file_map
 
-# Copy files locally to a staging directory
-def copy_files_to_directory(file_map, target_dir="copied_files"):
-    os.makedirs(target_dir, exist_ok=True)
-    copied, failed, skipped = 0, 0, 0
-    for bib_id, (src_path, _) in file_map.items():
-        filename = os.path.basename(src_path)
-        dest_path = os.path.join(target_dir, filename)
-        try:
-            if os.path.exists(dest_path):
-                print(f"File already exists, skipping: {dest_path}")
-                skipped += 1
-            else:
-                if os.path.exists(src_path):
-                    shutil.copy2(src_path, dest_path)
-                    print(f"Copied: {filename}")
-                    copied += 1
-                else:
-                    print(f"Source file not found: {src_path}")
-                    failed += 1
-        except Exception as e:
-            print(f"Error copying {src_path}: {e}")
-            failed += 1
-    print(f"Copy completed: {copied} copied, {skipped} skipped, {failed} failed.")
-    return copied, failed
-
 # Upload a single file via local rmapi
 def upload_with_rmapi(local_path, remote_folder="/"):
     filename = os.path.basename(local_path)
@@ -110,21 +84,37 @@ def upload_with_rmapi(local_path, remote_folder="/"):
             print(f"❌ Upload failed for {filename}: {error_msg}")
             return False
 
-# Walk staging directory and send each file via rmapi
-def transfer_files_via_rmapi(source_dir="copied_files", remote_folder="/"):
-    if not os.path.isdir(source_dir):
-        print(f"❌ Source directory '{source_dir}' not found.")
-        return
-    files = [f for f in os.listdir(source_dir) if os.path.isfile(os.path.join(source_dir, f))]
-    if not files:
-        print(f"❌ No files to upload in '{source_dir}'.")
+# Upload files directly from file_map via rmapi
+def upload_files_directly(file_map, remote_folder="/"):
+    """
+    Upload files directly from their original locations using rmapi.
+    
+    Args:
+        file_map: Dictionary with bib_id as keys and (file_path, meta) as values
+        remote_folder: Remote folder path on reMarkable
+    """
+    if not file_map:
+        print("❌ No files to upload.")
         return
     
-    success, failed, skipped, exists, unsupported = 0, 0, 0, 0, 0
+    print(f"📁 Found {len(file_map)} entries to process:")
     
-    for fname in files:
-        local_path = os.path.join(source_dir, fname)
-        result = upload_with_rmapi(local_path, remote_folder)
+    success, failed, skipped, exists, unsupported, missing = 0, 0, 0, 0, 0, 0
+    
+    for bib_id, (file_path, meta) in file_map.items():
+        filename = os.path.basename(file_path)
+        title = meta.get('title', 'Untitled')
+        
+        # Check if file exists
+        if not os.path.exists(file_path):
+            print(f"❌ File not found: {filename} (from {title})")
+            missing += 1
+            continue
+        
+        print(f"📄 Processing: {filename}")
+        print(f"   📚 Title: {title}")
+        
+        result = upload_with_rmapi(file_path, remote_folder)
         
         if result is True:
             success += 1
@@ -142,6 +132,7 @@ def transfer_files_via_rmapi(source_dir="copied_files", remote_folder="/"):
     print(f"   📄 Already existed: {exists}")
     print(f"   ⚠️  Unsupported format: {unsupported}")
     print(f"   ⏭️  Pre-filtered: {skipped}")
+    print(f"   📂 File not found: {missing}")
     print(f"   ❌ Failed: {failed}")
     
     total_processed = success + exists
@@ -224,11 +215,11 @@ def main():
         print("Error: local 'rmapi' binary not found or not executable.")
         print("Please download it from https://github.com/ddvk/rmapi/releases and place it in the project root.")
         sys.exit(1)
+    
     bib_entries = load_bib_entries("send2remarkable.bib")
     print(f"Loaded {len(bib_entries)} BibTeX entries.")
     file_map = build_file_map(bib_entries)
     print(f"Built file map with {len(file_map)} entries.")
-    copy_files_to_directory(file_map, target_dir="copied_files")
     
     print("\n" + "="*50)
     print("🚀 Starting reMarkable Upload Process")
@@ -239,8 +230,8 @@ def main():
         print("❌ Cannot proceed without rmapi authentication. Exiting.")
         sys.exit(1)
     
-    print("\n📤 Starting upload via rmapi...")
-    transfer_files_via_rmapi(source_dir="copied_files", remote_folder="/")
+    print("\n📤 Uploading files directly to reMarkable...")
+    upload_files_directly(file_map, remote_folder="/")
 
 if __name__ == "__main__":
     main()
