@@ -2,12 +2,15 @@
 
 A Python tool that automatically syncs PDF attachments from Zotero to your reMarkable tablet. Export your Zotero library to BibTeX, and this tool will upload all attached PDFs directly to your reMarkable device using rmapi.
 
+## Current bugs 🐞
+
+Bibtex parsing fails if Zotero entry contains more than a PDF file (e.g. a HTML snapshot)
+
 ## Features
 
 - 📚 **Automatic PDF Sync**: Extract and upload PDF attachments from Zotero BibTeX exports
 - 🔐 **Secure Authentication**: Integrated rmapi authentication with guided setup
 - 📁 **Organized Storage**: Uploads files to a dedicated `/Zotero2Remarkable` folder
-- 🎯 **Smart Filtering**: Supports PDF, EPUB, TXT, and Markdown files
 - 👀 **File Watching**: Automatic triggering when BibTeX files change
 - 🚀 **Direct Integration**: Works with Better BibTeX for seamless Zotero automation
 - 📊 **Detailed Feedback**: Comprehensive upload summaries with success/failure reports
@@ -48,10 +51,10 @@ A Python tool that automatically syncs PDF attachments from Zotero to your reMar
 ### Basic Usage
 
 1. **Export your Zotero library**:
-   - In Zotero, select items or collections
-   - Go to File → Export Library
-   - Choose "Better BibTeX" format (or standard BibTeX)
-   - Save as `send2remarkable.bib` in the project directory
+   - In Zotero, select collection to be synced
+   - Right click → Export Collection
+   - Choose "Better BibLaTeX" or "Better BibTeX" format
+   - Save as `send2remarkable.bib` in the project directory (or any other file name. in this case make sure to update the paths in watch.bib accordingly. see below)
 
 2. **Run the sync**:
    ```bash
@@ -73,9 +76,11 @@ For automatic syncing when your BibTeX file changes:
    ```
 
 2. **Configure Better BibTeX** (optional):
-   - In Zotero preferences, go to Better BibTeX → Export
-   - Set up automatic export to `send2remarkable.bib`
-   - Enable postscript to trigger sync automatically
+   - In Zotero, select collection to be synced
+   - Right click → Export Collection
+   - Choose "Better BibLaTeX" or "Better BibTeX" format
+   - Select "Keep updated"
+   - Save as `send2remarkable.bib` in the project directory (or any other file name. in this case make sure to update the paths in watch.bib accordingly. see below)
 
 ## Configuration
 
@@ -94,53 +99,7 @@ SCRIPT = "/path/to/your/app.py"
 The tool automatically filters and uploads:
 - ✅ PDF files (.pdf)
 - ✅ EPUB files (.epub)
-- ✅ Text files (.txt)
-- ✅ Markdown files (.md)
-
-### Remote Folder Structure
-
-Files are organized on your reMarkable in:
-```
-/Zotero2Remarkable/
-├── document1.pdf
-├── document2.pdf
-└── ...
-```
-
-## Better BibTeX Integration
-
-For seamless automation with Zotero:
-
-1. **Install Better BibTeX plugin** in Zotero
-2. **Configure automatic export**:
-   - Preferences → Better BibTeX → Export
-   - Set "Export directory" to your project folder
-   - Enable "Export on change"
-   - Choose filename: `send2remarkable.bib`
-
-3. **Add postscript** (optional):
-   ```javascript
-   // Trigger Zotero2Remarkable sync after export
-   const { exec } = require('child_process');
-   exec('python /path/to/Zotero2Remarkable/app.py');
-   ```
-
-## Usage Examples
-
-### Manual Sync
-```bash
-# Basic sync with default settings
-python app.py
-
-# Check authentication status
-python app.py --check-auth
-```
-
-### Automated Monitoring
-```bash
-# Watch for BibTeX file changes and auto-sync
-python watch_bib.py
-```
+- Feature to come: Automated File conversion
 
 ### Output Example
 ```
@@ -192,71 +151,4 @@ python watch_bib.py
 - Test manual runs first: `python app.py`
 - Check if BibTeX file is actually being modified
 
-### Debug Mode
 
-For detailed debugging information:
-```bash
-# Check rmapi status
-./rmapi ls
-
-# Test BibTeX parsing
-python -c "from app import load_bib_entries; print(load_bib_entries('send2remarkable.bib'))"
-
-# Verify file paths
-python -c "from app import build_file_map, load_bib_entries; print(build_file_map(load_bib_entries('send2remarkable.bib')))"
-```
-
-## Architecture
-
-### Core Components
-
-- **`app.py`**: Main application with BibTeX parsing and rmapi integration
-- **`watch_bib.py`**: File system watcher for automatic triggering
-- **`rmapi`**: Binary for reMarkable cloud communication
-- **`send2remarkable.bib`**: BibTeX input file from Zotero
-
-### Workflow
-
-1. **Parse**: Extract file paths and metadata from BibTeX
-2. **Validate**: Check file existence and format support
-3. **Authenticate**: Ensure rmapi cloud connection
-4. **Upload**: Transfer files directly to reMarkable
-5. **Report**: Provide detailed success/failure summary
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-### Development Setup
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes and test thoroughly
-4. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- [rmapi](https://github.com/ddvk/rmapi) for reMarkable cloud integration
-- [Better BibTeX](https://retorque.re/zotero-better-bibtex/) for enhanced Zotero exports
-- [Zotero](https://www.zotero.org/) for reference management
-- [reMarkable](https://remarkable.com/) for the amazing e-paper tablet
-
-## Support
-
-If you encounter issues:
-
-1. Check the [troubleshooting section](#troubleshooting)
-2. Search existing [GitHub issues](https://github.com/yourusername/Zotero2Remarkable/issues)
-3. Create a new issue with:
-   - Your operating system
-   - Python version
-   - Error messages
-   - Steps to reproduce
-
----
-
-**Happy reading on your reMarkable! 📚✨**
