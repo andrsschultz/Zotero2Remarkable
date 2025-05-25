@@ -93,26 +93,25 @@ def copy_files_to_directory(file_map, target_dir="copied_files"):
             
             # Create destination path
             dest_path = os.path.join(target_dir, filename)
-            
-            # Handle filename conflicts by appending bib_id
+
+            # Check if the file with bib_id suffix already exists too
             if os.path.exists(dest_path):
-                name, ext = os.path.splitext(filename)
-                dest_path = os.path.join(target_dir, f"{name}_{bib_id}{ext}")
-                
-                # Check if the file with bib_id suffix already exists too
+                print(f"File already exists, skipping: {dest_path}")
+                skipped_count += 1
+            else: 
+                # Handle filename conflicts by appending bib_id
                 if os.path.exists(dest_path):
-                    print(f"File already exists, skipping: {dest_path}")
-                    skipped_count += 1
-                    continue
-            
-            # Copy the file
-            if os.path.exists(file_path):
-                shutil.copy2(file_path, dest_path)
-                print(f"Copied: {filename} -> {dest_path}")
-                copied_count += 1
-            else:
-                print(f"Source file not found: {file_path}")
-                failed_count += 1
+                    name, ext = os.path.splitext(filename)
+                    dest_path = os.path.join(target_dir, f"{name}_{bib_id}{ext}")
+                
+                # Copy the file
+                if os.path.exists(file_path):
+                    shutil.copy2(file_path, dest_path)
+                    print(f"Copied: {filename} -> {dest_path}")
+                    copied_count += 1
+                else:
+                    print(f"Source file not found: {file_path}")
+                    failed_count += 1
                 
         except Exception as e:
             print(f"Error copying {file_path}: {str(e)}")
