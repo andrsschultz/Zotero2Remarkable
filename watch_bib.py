@@ -4,13 +4,13 @@ from watchdog.events import FileSystemEventHandler
 import subprocess
 import os
 
-# Path to your .bib file
-BIB_PATH = "/Users/andreasschultz/GitHub/Zotero2Remarkable/send2remarkable.bib"  # Full absolute path
-BIB_PATH_ABS = os.path.abspath(BIB_PATH)  # Convert to absolute path
+# Configuration - Update these paths for your setup
+BIB_PATH = "/path/to/your/bibliography.bib"  # Update this to your .bib file path
+BIB_PATH_ABS = os.path.abspath(BIB_PATH)
 
-# Your python executable and app.py
-PYTHON = "/Users/andreasschultz/GitHub/Zotero2Remarkable/.venv/bin/python"
-SCRIPT = "/Users/andreasschultz/GitHub/Zotero2Remarkable/app.py"
+# Python executable and script paths - Update these for your environment
+PYTHON = "/path/to/your/python"  # Update this to your Python executable
+SCRIPT = "/path/to/your/app.py"  # Update this to your app.py path
 
 class BibChangeHandler(FileSystemEventHandler):
     def on_modified(self, event):
