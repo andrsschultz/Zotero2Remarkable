@@ -14,7 +14,10 @@ Bibtex parsing fails if Zotero entry contains more than a PDF file (e.g. a HTML 
 - 👀 **File Watching**: Automatic triggering when BibTeX files change
 - 🚀 **Direct Integration**: Works with Better BibTeX for seamless Zotero automation
 - 📊 **Detailed Feedback**: Comprehensive upload summaries with success/failure reports
-- 🔮 **Planned**: Syncing back from reMarkable to Zotero including annotations; automated conversion of unsupported files to PDF
+
+## Planned Features
+- Syncing back from reMarkable to Zotero including annotations
+- Automated conversion of unsupported files to PDF
 
 ## Prerequisites
 
